@@ -23,7 +23,7 @@ const EmergencyContactSchema = z.object({
 
 const PatientFormSchema = z.object({
   firstName: z
-    .string()
+    .string("Please input your first name")
     .min(2, {
       message: "First Name is required and must be at least 2 characters."
     }),
@@ -34,7 +34,7 @@ const PatientFormSchema = z.object({
     .optional()
     .nullable(),
   lastName: z
-    .string()
+    .string('Please input your last name')
     .min(2, {
       message: "Last Name is required and must be at least 2 characters."
     }),
@@ -44,9 +44,9 @@ const PatientFormSchema = z.object({
     })
     .max(new Date(), {message: 'Birth date cannot be in the future.'}),
   gender: z
-    .enum(GENDERS),
+    .enum(GENDERS, 'Please select gender'),
   phoneNumber: z
-    .string()
+    .string("Phone Number is required")
     .regex(thaiMobileRegex, {
       message: "Phone Number is required and must be a valid format"
     }),
@@ -55,14 +55,11 @@ const PatientFormSchema = z.object({
       message: "Email is required and must be a valid email address."
     }),
   address: z
-    .string()
-    .min(1, {
-      message: "Address is required"
-    }),
+    .string("Address is required"),
   preferredLanguage: z
-    .enum(Object.keys(Languages) as [keyof typeof Languages, ...string[]]),
+    .enum(Object.keys(Languages) as [keyof typeof Languages, ...string[]],'Please select language'),
   nationality: z
-    .enum(Object.keys(CountryCode) as [keyof typeof CountryCode, ...string[]]),
+    .enum(Object.keys(CountryCode) as [keyof typeof CountryCode, ...string[]],'Please select nationality'),
 
   // Optional Fields
   emergencyContact: EmergencyContactSchema,

@@ -1,25 +1,15 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import io from 'socket.io-client';
-import { v4 as uuidv4 } from 'uuid';
-
-import { useForm, useWatch } from 'react-hook-form';
+import { useEffect} from 'react'
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns'
 import {
     countryOptions,
     GENDERS,
-    PatientFormInput,
     PatientFormSchema,
     languagesOptions
-} from '../../libs/utils/validator';
-import {
-    GENERAL_EVENT,
-    PATIENT_EVENT,
-    PATIENT_STATUS, USER_ROLE
-} from '@/libs/constants/socket.constant';
-import { CountryCode, Languages } from '@/libs/nationality';
+} from '../../../libs/utils/validator';
 import {
     Form,
     FormControl,
@@ -28,13 +18,13 @@ import {
     FormItem,
     FormLabel,
     FormMessage
-} from '../ui/form';
-import { Input } from '../ui/input';
+} from '../../ui/form';
+import { Input } from '../../ui/input';
 import {
     Popover,
     PopoverTrigger
 } from '@radix-ui/react-popover';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 import {
     Command,
     CommandEmpty,
@@ -42,99 +32,49 @@ import {
     CommandInput,
     CommandItem,
     CommandList
-} from '../ui/command';
+} from '../../ui/command';
 import {
     CalendarIcon,
     Check,
     ChevronsUpDown
 } from 'lucide-react';
-import { PopoverContent } from '../ui/popover';
+import { PopoverContent } from '../../ui/popover';
 import { cn } from "@/lib/utils"
-import { Calendar } from '../ui/calendar';
+import { Calendar } from '../../ui/calendar';
 import {
     SelectContent,
     SelectTrigger,
     SelectValue,
     SelectItem,
     Select
-} from '../ui/select';
-import { useRouter } from 'next/navigation';
+} from '../../ui/select';
 
-let socket: ReturnType<typeof io> | null = null;
-let IDLE_COUNTDOWN_TIMER_SECOND: number = 10;
+type Props = {
+    data : any;
+}
 
-function PatientForm() {
-    const router = useRouter();
-    const submittedRef = useRef(false);
-    const [sessionId] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('session') || uuidv4();
-        }
-
-        return 'unknown';
-    });
-
-    // const { register, handleSubmit, watch, formState } = useForm({
+function PatientFormMonitoring({data}: Props) {
     const form = useForm({
         resolver: zodResolver(PatientFormSchema),
-        defaultValues: {
-            middleName: null,
-        }
     });
-    const { handleSubmit, watch, formState } = form;
-    const watchAll = watch();
-    const idleTimer = useRef<number | null>(null);
-    const { isSubmitSuccessful, errors } = formState;
 
-    // Emit when enter or exit form page
     useEffect(() => {
-        socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000');
-        socket.emit(GENERAL_EVENT.JOIN, { sessionId, role: USER_ROLE.PATIENT });
-
-        return () => {
-            socket?.disconnect();
-        };
-    }, [sessionId]);
-
-    // Emit when patient filling form
-    useEffect(() => {
-        if (!socket || isSubmitSuccessful || submittedRef.current) return;
-        socket?.emit(PATIENT_EVENT.UPDATE, { sessionId, payload: watchAll });
-        socket?.emit(PATIENT_EVENT.STATUS, { sessionId, status: PATIENT_STATUS.FILLING });
-
-        if (idleTimer.current) window.clearTimeout(idleTimer.current);
-        idleTimer.current = window.setTimeout(() => {
-            socket?.emit(PATIENT_EVENT.STATUS, { sessionId, status: PATIENT_STATUS.IDLE });
-        }, IDLE_COUNTDOWN_TIMER_SECOND * 1000);
-
-    }, [watchAll, sessionId]);
-
-    const onSubmit = (data: PatientFormInput) => {
-        // if(errors) return;
-        submittedRef.current = true;
-        socket?.emit(PATIENT_EVENT.UPDATE, { sessionId, payload: data });
-        socket?.emit(PATIENT_EVENT.STATUS, { sessionId, status: PATIENT_STATUS.SUBMIT });
-        if (idleTimer.current) window.clearTimeout(idleTimer.current);
-        // Add proper alert later!!!
-        alert('Form Submitted - thank you!');
-
-        setTimeout(()=>{
-            router.replace('/');
-        },200);
-    }
+        if (data) {
+            form.reset(data); 
+        }
+    }, [data]);
 
     return (
         <div className='p-4 max-w-3xl mx-auto'>
             <h1 className='text-2xl font-semibold mb-4'>Patient Form</h1>
             <Form {...form}>
                 <form
-                    onSubmit={handleSubmit(onSubmit)}
                     className='space-y-4'
                 >
                     <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
                         <FormField
                             control={form.control}
+                            disabled={true}
                             name="firstName"
                             render={({ field }) => (
                                 <FormItem>
@@ -150,6 +90,7 @@ function PatientForm() {
                         />
                         <FormField
                             control={form.control}
+                            disabled={true}
                             name="middleName"
                             render={({ field }) => (
                                 <FormItem>
@@ -169,6 +110,7 @@ function PatientForm() {
                         <FormField
                             control={form.control}
                             name="lastName"
+                            disabled={true}
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Last Name</FormLabel>
@@ -192,10 +134,11 @@ function PatientForm() {
                         <FormField
                             control={form.control}
                             name="gender"
+                            disabled={true}
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Gender</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={true}>
                                         <FormControl>
                                             <SelectTrigger className='w-[200px]'>
                                                 <SelectValue placeholder="Select gender" />
@@ -218,11 +161,12 @@ function PatientForm() {
                         <FormField
                             control={form.control}
                             name="dateOfBirth"
+                            disabled={true}
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
                                     <FormLabel>Date of birth</FormLabel>
                                     <Popover>
-                                        <PopoverTrigger asChild>
+                                        <PopoverTrigger asChild disabled={true}>
                                             <FormControl>
                                                 <Button
                                                     variant={"outline"}
@@ -246,9 +190,7 @@ function PatientForm() {
                                                 selected={field.value}
                                                 onSelect={field.onChange}
                                                 captionLayout='dropdown'
-                                                disabled={(date: any) =>
-                                                    date > new Date() || date < new Date("1900-01-01")
-                                                }
+                                                disabled={true}
                                             />
                                         </PopoverContent>
                                     </Popover>
@@ -264,6 +206,7 @@ function PatientForm() {
                         <FormField
                             control={form.control}
                             name="phoneNumber"
+                            disabled={true}
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Phone number</FormLabel>
@@ -284,6 +227,7 @@ function PatientForm() {
                         <FormField
                             control={form.control}
                             name='email'
+                            disabled={true}
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel htmlFor="email">Email</FormLabel>
@@ -303,6 +247,7 @@ function PatientForm() {
                         <FormField
                             control={form.control}
                             name="address"
+                            disabled={true}
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Address</FormLabel>
@@ -323,11 +268,12 @@ function PatientForm() {
                         <FormField
                             control={form.control}
                             name="preferredLanguage"
+                            disabled={true}
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
                                     <FormLabel>Language</FormLabel>
                                     <Popover>
-                                        <PopoverTrigger asChild>
+                                        <PopoverTrigger asChild disabled={true}>
                                             <FormControl>
                                                 <Button
                                                     variant="outline"
@@ -385,11 +331,12 @@ function PatientForm() {
                         <FormField
                             control={form.control}
                             name="nationality"
+                            disabled={true}
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
                                     <FormLabel>Nationality</FormLabel>
                                     <Popover>
-                                        <PopoverTrigger asChild>
+                                        <PopoverTrigger asChild disabled={true}>
                                             <FormControl>
                                                 <Button
                                                     variant="outline"
@@ -448,6 +395,7 @@ function PatientForm() {
                         <FormField
                             control={form.control}
                             name="religion"
+                            disabled={true}
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Religion (Optional)</FormLabel>
@@ -471,6 +419,7 @@ function PatientForm() {
                         <FormField
                             control={form.control}
                             name="emergencyContact.name"
+                            disabled={true}
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Name</FormLabel>
@@ -490,6 +439,7 @@ function PatientForm() {
                     <FormField
                         control={form.control}
                         name="emergencyContact.relationship"
+                        disabled={true}
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Relationship</FormLabel>
@@ -504,20 +454,10 @@ function PatientForm() {
                             </FormItem>
                         )}
                     />
-
-                    <div className='w-full flex justify-end'>
-                        <Button type='submit' className='btn w-full md:w-30'>Submit</Button>
-                    </div>
                 </form>
             </Form>
-
-            {/* <span className='mt-5 text-sm text-gray-500'>
-                Share this URL with staff or they can view via the staff dashboard :
-                {sessionId}
-            </span> */}
-
         </div>
     )
 }
 
-export default PatientForm
+export default PatientFormMonitoring
