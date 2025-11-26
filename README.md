@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Agnos Candidate Assignment — Frontend (Patient + Staff)
 
-## Getting Started
+## Overview
+This project implements a responsive patient intake form and a staff monitoring view synchronized in real time using Socket.IO.
 
-First, run the development server:
+## Tech stack
+- Frontend: Next.js, React, TailwindCSS, Shadcn, Zustand
+- Backend: Node, Express
+- Realtime: Socket.IO (server + client)
+- Backend hosting: Render (simple Node server using in-memory)
+- Frontend hosting: Vercel
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Quickstart (local)
+1. Backend
+    - cd backend
+    - npm install
+    - npm run dev
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+    ### result
+    Server listen on http://localhost:6969
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. Frontend
+    - cd frontend
+    - npm install
+    - set .env = NEXT_PUBLIC_SOCKET_URL = http://localhost:6969
+    - npm run dev
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment
+- Deploy backend (Node) to Render Get public URL : (https://patient-appointment-form.vercel.app/).
+- Deploy frontend to Vercel. Set `NEXT_PUBLIC_SOCKET_URL` env var to backend URL : 'https://patient-appointment-node-socket.onrender.com/'.
+** Render will drop server when Inactive for sometime, will take roughly 50 second to recovering 
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
+(see tree in repo root README)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Real-time synchronization flow
+- GENERAL_EVENT.JOIN : let admin join admin room and get all the current data
+- GENERAL_EVENT.LEAVE : let admin leave anyroom
+- GENERAL_EVENT.SNAPSHOT : fire when click on current sessionId to monitoring form in real-time
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- PATIENT_EVENT.UPDATE : let patient send updated current data that filled in form
+- PATIENT_EVENT.STATUS : let patient send updated current status to update current session status
+- PATIENT_EVENT.STATUS_CARD : let patient send updated current status (small package) to update session listing
 
-## Deploy on Vercel
+-ADMIN_EVENT.REQUEST_SESSION_LIST : let admin request all session list when join (WIP)
+-ADMIN_EVENT.REQUEST_SESSION : let admin request curtain session to monitoring (WIP)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Bonus features implemented
+- Debounced typing updates
+- Idle detection
+- Monitring status of all current and past patient
+- Snapshot support for staff join

@@ -1,0 +1,79 @@
+-  patient_appointment_form_frontend/
+-  ├─ README.md
+-  ├─ package.json
+-  ├─ package-lock.json
+-  ├─ tsconfig.json
+-  ├─ next.config.ts
+-  ├─ postcss.config.mjs
+-  ├─ tailwind.config.js
+-  ├─ eslint.config.mjs
+-  ├─ components.json
+-  │ 
+-  ├─ app/                               # Next.js app router
+-  │   ├─ layout.tsx                      # Root layout, global nav, providers
+-  │   ├─ globals.css                     # Tailwind/global styles
+-  │   ├─ page.tsx                        # Landing / index page just to link to patient path and admin path
+-  │   │
+-  │   ├─ patient/
+-  │   │   ├─ page.tsx                     # /patient route — Patient form page
+-  │   │   └─ components/
+-  │   │      ├─ PatientForm.tsx           # main form component (react-hook-form + zod)
+-  │   │      ├─ FieldInput.tsx            # small controlled input component
+-  │   │      ├─ PhoneInput.tsx            # phone field with validation mask
+-  │   │      └─ IdleTimer.tsx             # idle detection UI (optional)
+-  │   │
+-  │   ├─ admin/                          # staff/admin UI
+-  │   │   ├─ page.tsx                     # /admin or /staff route — session list & details
+-  │   │   └─ components/
+-  │   │      ├─ SessionList.tsx           # list container for SessionCard
+-  │   │      ├─ SessionCard.tsx           # small card showing sessionId + status badge
+-  │   │      ├─ SessionDetail.tsx         # full read-only view of patient fields
+-  │   │      └─ StatusBadge.tsx           # badge component mapping status -> color
+-  │   │
+-  │   └─ api/                            # optional Next.js route handlers (health check)
+-  │       └─ health/route.ts
+-  │ 
+-  ├─  components/                        # UI primitives & shared components
+-  │   ├─ ui/
+-  │   │   ├─ Button.tsx
+-  │   │   ├─ Badge.tsx
+-  │   │   └─ Card.tsx
+-  │   └─ layout/
+-  │       ├─ Navbar.tsx
+-  │       └─ Footer.tsx
+-  │
+-  ├─ lib/                               # shared libs & helpers
+-  │   ├─ socket.ts                       # socket.io-client singleton / provider
+-  │   ├─ events.ts                       # event name constants (PATIENT_EVENT, etc.)
+-  │   ├─ status.ts                       # patient status enum / helpers
+-  │   └─ validators/
+-  │      └─ patientSchema.ts             # zod schema for patient form
+-  │
+-  ├─ libs/                              # extra libraries or internal packages (if any)
+-  │   └─ (optional helper libs)
+-  │
+-  ├─ stores/                            # client state (Zustand / context / recoil)
+-  │   ├─ sessionStore.ts                 # session list / selectedSession store
+-  │   └─ uiStore.ts
+-  │
+-  ├─ public/
+-  │   ├─ favicon.ico
+-  │   └─ images/
+-  │      └─ logo.png
+-  │
+-  ├─ styles/
+-  │   └─ tailwind.css
+-  │
+-  └─ utils/
+-    ├─ format.ts
+-    └─ logger.ts
+
+
+
+### Key folders
+- `app/` — Next.js app router pages and route-specific components (patient & admin UI).
+- `components/` — Shared UI primitives (mostly main component of Admin and Patient).
+- `lib/` — Application helpers: single socket instance, event constants, zod schemas.
+- `stores/` — Client-side state management (session list, UI state).
+- `public/` — Static assets (favicon, images).
+- `styles/` — Tailwind and global CSS.
